@@ -7,6 +7,8 @@ const express = require('express');
 const path = require('path');
 const engine = require('./lib/engine');
 const tryever = require('./integrations/tryever');
+const quotaMonitor = require('./lib/quota_monitor');
+const { runMonitorCycle } = require('./scripts/auto_quota_monitor');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,12 +41,15 @@ app.post('/api/sync', async (req, res) => {
 app.get('/api/stats', async (req, res) => {
     try {
         const counts = await engine.messageQueue.getJobCounts();
+        const connectors = await quotaMonitor.checkAll(); // Get latest statuses
+
         // Return comprehensive stats for dashboard
         res.json({
             totalSent: 1284,
             replyRate: 18.4,
             queue: counts,
-            config: engine.systemConfig
+            config: engine.systemConfig,
+            connectors: connectors
         });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -61,4 +66,7 @@ app.listen(PORT, () => {
   - TryEver Integration: Ready
   ---------------------------------------------------------
   `);
+
+    // Start the Quota Monitor in background
+    runMonitorCycle().catch(console.error);
 });

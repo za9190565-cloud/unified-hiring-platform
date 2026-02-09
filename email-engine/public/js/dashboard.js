@@ -38,6 +38,7 @@ function renderUsers(data = users) {
             <td><span class="badge ${u.status}">${u.status}</span></td>
             <td>${u.lastReply}</td>
             <td><div class="rep-bar" style="width: ${u.reputation}%; background: ${u.reputation > 70 ? 'var(--success)' : 'var(--warning)'}"></div></td>
+            <td id="sent-by-${u.id}" style="font-size: 11px; color: var(--text-muted);">-</td>
             <td>
                 <button class="btn btn-icon ${u.status !== 'verified' ? 'disabled' : ''}" onclick="sendIndividual('${u.id}')">
                     <i class="fas fa-paper-plane"></i>
@@ -94,6 +95,11 @@ async function refreshStats() {
         document.getElementById('stat-reply-rate').innerText = `${data.replyRate || 0}%`;
         document.getElementById('stat-queue-size').innerText = data.queue ? data.queue.waiting : 0;
 
+        // Render Connectors
+        if (data.connectors) {
+            renderConnectors(data.connectors);
+        }
+
         // Randomize chart for visual flavor
         const bars = document.querySelectorAll('.bar');
         bars.forEach(b => {
@@ -102,6 +108,20 @@ async function refreshStats() {
     } catch (e) {
         console.error('Failed to fetch stats', e);
     }
+}
+
+// Render Connectors
+function renderConnectors(connectors) {
+    const container = document.getElementById('connectors-status');
+    if (!container) return;
+    container.innerHTML = '';
+
+    connectors.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'connector-bubble';
+        div.innerHTML = `<div class="dot ${c.status}"></div> <span>${c.email}</span>`;
+        container.appendChild(div);
+    });
 }
 
 // Actions

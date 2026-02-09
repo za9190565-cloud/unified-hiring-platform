@@ -221,6 +221,45 @@ h1 {
     transition: 0.5s;
 }
 
+/* Connectors grid */
+.connectors-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.connector-bubble {
+    padding: 8px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.connector-bubble .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot.READY {
+    background: var(--success);
+    box-shadow: 0 0 5px var(--success);
+}
+
+.dot.BLOCKED {
+    background: var(--danger);
+    box-shadow: 0 0 5px var(--danger);
+}
+
+.dot.ERROR {
+    background: var(--warning);
+    box-shadow: 0 0 5px var(--warning);
+}
+
 /* Filters bar */
 .filters-bar {
     display: flex;
