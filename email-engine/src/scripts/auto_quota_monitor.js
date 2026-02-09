@@ -43,7 +43,4 @@ function addLogToDashboard(msg) {
     console.log(`[DASHBOARD_LOG] ${msg}`);
 }
 
-// Start the monitor
-runMonitorCycle();
-
 module.exports = { runMonitorCycle };

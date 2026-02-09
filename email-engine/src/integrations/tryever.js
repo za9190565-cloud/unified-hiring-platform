@@ -29,6 +29,7 @@ async function syncUserStatus(userId) {
                     lastReplyAt: userData.lastReplyAt
                 },
                 'تحديث بيانات هيئة الرقابة',
+                null,
                 1 // High priority for verified
             );
             return { status: 'synced', userId };

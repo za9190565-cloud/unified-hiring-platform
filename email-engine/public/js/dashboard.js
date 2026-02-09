@@ -71,6 +71,11 @@ function addLog(msg, type = 'info') {
     entry.className = 'log-entry';
     entry.innerHTML = `<span class="log-time">${time}</span> <span class="log-tag tag-${type}">[${type.toUpperCase()}]</span> ${msg}`;
     container.prepend(entry);
+    
+    // Keep only last 100 logs
+    while (container.children.length > 100) {
+        container.removeChild(container.lastChild);
+    }
 }
 
 function clearLogs() {
@@ -100,6 +105,11 @@ async function refreshStats() {
             renderConnectors(data.connectors);
         }
 
+        // Update recent jobs
+        if (data.recentJobs && data.recentJobs.length > 0) {
+            updateRecentJobs(data.recentJobs);
+        }
+
         // Randomize chart for visual flavor
         const bars = document.querySelectorAll('.bar');
         bars.forEach(b => {
@@ -121,6 +131,26 @@ function renderConnectors(connectors) {
         div.className = 'connector-bubble';
         div.innerHTML = `<div class="dot ${c.status}"></div> <span>${c.email}</span>`;
         container.appendChild(div);
+    });
+}
+
+// Update Recent Jobs in UI
+function updateRecentJobs(jobs) {
+    jobs.forEach(job => {
+        if (job.result && job.result.success) {
+            const leadId = job.data.leadId;
+            const sentBy = job.result.by;
+            const sentAt = new Date(job.result.sentAt).toLocaleTimeString('ar-EG');
+            
+            // Update user table if exists
+            const cell = document.getElementById(`sent-by-${leadId}`);
+            if (cell) {
+                cell.innerHTML = `<i class="fas fa-check-circle" style="color: var(--success);"></i> ${sentBy}<br><small>${sentAt}</small>`;
+            }
+            
+            // Add to logs
+            addLog(`تم إرسال رسالة إلى ${job.result.to} عبر ${sentBy}`, 'success');
+        }
     });
 }
 
@@ -161,8 +191,51 @@ async function saveConfig(e) {
 }
 
 function sendIndividual(id) {
-    addLog(`جاري إلحاق المستخدم ${id} في طابور الإرسال...`, 'info');
-    showToast('تم الإلحاق في الطابور');
+    const user = users.find(u => u.id === id);
+    if (!user || user.status !== 'verified') return;
+    
+    fetch('/api/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: id, email: user.email })
+    }).then(res => res.json())
+      .then(data => {
+          if (data.success) {
+              addLog(`تم إلحاق ${user.name} في طابور الإرسال`, 'success');
+              showToast('تم الإلحاق في الطابور');
+          }
+      });
+}
+
+async function startSending() {
+    const verifiedUsers = users.filter(u => u.status === 'verified');
+    
+    if (verifiedUsers.length === 0) {
+        showToast('لا يوجد مستخدمين مفعلين');
+        return;
+    }
+    
+    addLog(`🚀 بدء الإرسال الجماعي لـ ${verifiedUsers.length} مستخدم`, 'info');
+    showToast(`جاري إرسال ${verifiedUsers.length} رسالة...`);
+    
+    try {
+        const res = await fetch('/api/send/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                users: verifiedUsers.map(u => ({ id: u.id, email: u.email, name: u.name }))
+            })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+            addLog(`✅ تم إلحاق ${data.queued} رسالة في طابور الإرسال`, 'success');
+            showToast('تم بدء الإرسال بنجاح');
+        }
+    } catch (err) {
+        addLog('❌ فشل بدء الإرسال', 'error');
+        showToast('حدث خطأ');
+    }
 }
 
 function exportData(format) {
@@ -170,8 +243,11 @@ function exportData(format) {
 }
 
 // Init
-document.getElementById('current-date').innerText = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
-renderUsers();
-setInterval(refreshStats, 5000);
-refreshStats();
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('current-date').innerText = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', month: 'long', day: 'numeric' }).format(new Date());
+    renderUsers();
+    setInterval(refreshStats, 5000);
+    refreshStats();
+    addLog('لوحة تحكم مرسل الذكي جاهزة للعمل.', 'success');
+});
 addLog('لوحة تحكم مرسل الذكي جاهزة العمل.', 'success');
