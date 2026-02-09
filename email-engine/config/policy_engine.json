@@ -1,0 +1,43 @@
+{
+    "sending_limits": {
+        "global": {
+            "rate_limit_per_domain": "1/60s",
+            "burst_limit": "3/10m",
+            "email_cooldown": "72h"
+        },
+        "account_warmup": {
+            "day_1_3": "20-30/day",
+            "day_4_7": "50-70/day",
+            "day_8_14": "100-150/day"
+        }
+    },
+    "content_rules": {
+        "max_subject_repetition": 5,
+        "subject_reset_interval": "24h",
+        "max_links_first_email": 1,
+        "forbidden_keywords": [
+            "⚠️ الآن",
+            "فورًا",
+            "آخر فرصة"
+        ],
+        "sender_identity": {
+            "name_pattern": "Human-like (e.g., إدارة الموارد البشرية – نزاهة)",
+            "is_fixed": true
+        }
+    },
+    "reputation_signals": {
+        "reply_weight": "High (Positive Boost)",
+        "no_reply_penalty": {
+            "action": "Change Subject and Body",
+            "after_days": 3
+        }
+    },
+    "failure_rules": {
+        "max_retries": 3,
+        "cooldowns": [
+            "30m",
+            "2h",
+            "24h"
+        ]
+    }
+}

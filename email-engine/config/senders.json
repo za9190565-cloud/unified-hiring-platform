@@ -1,0 +1,44 @@
+[
+    {
+        "email": "info@tryallygen.com",
+        "pass": "mfsm zcqf gqmj xhbm",
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "secure": true
+    },
+    {
+        "email": "recru@tryallygen.com",
+        "pass": "zmor xoxa lisk wskh",
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "secure": true
+    },
+    {
+        "email": "hr@tryeverengine.com",
+        "pass": "qqgy goae xtnf rfxv",
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "secure": true
+    },
+    {
+        "email": "hr@tryallygen.com",
+        "pass": "rmbs nmbo vnko pgnm",
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "secure": true
+    },
+    {
+        "email": "rec@tryeverengine.com",
+        "pass": "ecvx nhlz jveq ipam",
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "secure": true
+    },
+    {
+        "email": "info@tryeverengine.com",
+        "pass": "ebbp gfhy kbhf ruzz",
+        "host": "smtp.gmail.com",
+        "port": 465,
+        "secure": true
+    }
+]

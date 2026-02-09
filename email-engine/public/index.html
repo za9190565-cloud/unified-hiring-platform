@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mursel Smart Dashboard | مرسل</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="glass-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-paper-plane"></i>
+                <span>مرسل الذكي</span>
+            </div>
+            <nav>
+                <a href="#" class="active" onclick="switchTab('stats')"><i class="fas fa-chart-line"></i> الإحصائيات</a>
+                <a href="#" onclick="switchTab('users')"><i class="fas fa-users"></i> قائمة الإرسال</a>
+                <a href="#" onclick="switchTab('logs')"><i class="fas fa-history"></i> السجلات</a>
+                <a href="#" onclick="switchTab('config')"><i class="fas fa-cog"></i> الإعدادات</a>
+            </nav>
+            <div class="status-card">
+                <div class="status-indicator online" id="engine-status-indicator"></div>
+                <span id="engine-status-text">المحرك متصل</span>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <header>
+                <h1 id="page-title">لوحة التحكم الذكية</h1>
+                <div class="user-profile">
+                    <span id="current-date">--</span>
+                    <i class="fas fa-bell"></i>
+                </div>
+            </header>
+
+            <!-- Stats Tab -->
+            <div id="stats-tab" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><i class="fas fa-envelope"></i></div>
+                        <div class="stat-info">
+                            <h3>إجمالي المرسل</h3>
+                            <p class="value" id="stat-total-sent">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-reply"></i></div>
+                        <div class="stat-info">
+                            <h3>نسبة الردود</h3>
+                            <p class="value" id="stat-reply-rate">0%</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fas fa-clock"></i></div>
+                        <div class="stat-info">
+                            <h3>في الانتظار (Queue)</h3>
+                            <p class="value" id="stat-queue-size">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2><i class="fas fa-bolt"></i> نشاط المحرك الفوري</h2>
+                    <div id="activity-chart" class="chart-placeholder">
+                        <div class="bar-container">
+                            <div class="bar" style="height: 40%"></div>
+                            <div class="bar" style="height: 60%"></div>
+                            <div class="bar" style="height: 80%"></div>
+                            <div class="bar" style="height: 50%"></div>
+                            <div class="bar" style="height: 90%"></div>
+                            <div class="bar" style="height: 70%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="users-tab" class="tab-content">
+                <div class="filters-bar card">
+                    <div class="search-group">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="بحث عن مستخدم..." id="user-search" oninput="filterUsers()">
+                    </div>
+                    <div class="filter-group">
+                        <label>الحالة:</label>
+                        <select id="status-filter" onchange="filterUsers()">
+                            <option value="all">الكل</option>
+                            <option value="verified">Verified</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-secondary" onclick="exportData('csv')"><i class="fas fa-file-export"></i>
+                        تصدير CSV</button>
+                </div>
+
+                <div class="card table-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-sync"></i> مزامنة TryEverEngine</h2>
+                        <button class="btn btn-primary" onclick="syncAll()"><i class="fas fa-cloud-download-alt"></i>
+                            مزامنة الكل</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="users-table">
+                            <thead>
+                                <tr>
+                                    <th>الموظف/المستلم</th>
+                                    <th>الحالة الرسمية</th>
+                                    <th>آخر رد</th>
+                                    <th>السمعة</th>
+                                    <th>الإجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-list">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configuration Tab -->
+            <div id="config-tab" class="tab-content">
+                <section class="config-section">
+                    <div class="card">
+                        <h2><i class="fas fa-sliders-h"></i> إعدادات المحرك</h2>
+                        <form id="engine-config-form" onsubmit="saveConfig(event)">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>الحد الأدنى اليومي</label>
+                                    <input type="number" name="warmupMin" value="20">
+                                </div>
+                                <div class="form-group">
+                                    <label>الحد الأقصى اليومي</label>
+                                    <input type="number" name="warmupMax" value="150">
+                                </div>
+                                <div class="form-group">
+                                    <label>الرسائل لكل دقيقة</label>
+                                    <input type="number" name="perMin" value="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>أولوية الرد (يوم)</label>
+                                    <input type="number" name="replyThreshold" value="1">
+                                </div>
+                                <div class="form-group action">
+                                    <button type="submit" class="btn btn-primary">حفظ الإعدادات</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Logs Tab -->
+            <div id="logs-tab" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-terminal"></i> سجل العمليات الفوري</h2>
+                        <button class="btn btn-icon" onclick="clearLogs()"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                    <div class="log-container" id="live-logs">
+                        <!-- Live logs -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>
